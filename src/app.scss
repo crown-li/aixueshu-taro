@@ -1,0 +1,9 @@
+// @use "~taro-ui/dist/style/index.scss" as *;
+@use "./components/icons/index.scss" as *;
+@use "tailwindcss/base" as *;
+@use "tailwindcss/components" as *;
+@use "tailwindcss/utilities" as *;
+
+page {
+  background: #f5f5f5;
+}

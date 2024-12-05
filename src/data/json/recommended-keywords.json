@@ -1,0 +1,196 @@
+{
+    "data":{
+        "cs-ai-nlp-llm-category": [
+            {
+                "id": "llm-architecture",
+                "name": "模型架构",
+                "keywords": [
+                    {
+                        "id": "transformer",
+                        "name": "Transformer",
+                        "hot": true
+                    },
+                    {
+                        "id": "attention-mechanism",
+                        "name": "注意力机制"
+                    },
+                    {
+                        "id": "multi-head-attention",
+                        "name": "多头注意力"
+                    },
+                    {
+                        "id": "decoder-only",
+                        "name": "Decoder-only架构"
+                    }
+                ]
+            },
+            {
+                "id": "llm-training",
+                "name": "训练方法",
+                "keywords": [
+                    {
+                        "id": "pre-training",
+                        "name": "预训练",
+                        "hot": true
+                    },
+                    {
+                        "id": "fine-tuning",
+                        "name": "微调"
+                    },
+                    {
+                        "id": "prompt-tuning",
+                        "name": "Prompt工程",
+                        "hot": true
+                    },
+                    {
+                        "id": "instruction-tuning",
+                        "name": "指令微调"
+                    }
+                ]
+            }
+        ],
+        "cs-ai-ml-deep-category": [
+            {
+                "id": "deep-learning-basics",
+                "name": "基础概念",
+                "keywords": [
+                    {
+                        "id": "neural-network",
+                        "name": "神经网络",
+                        "hot": true
+                    },
+                    {
+                        "id": "backpropagation",
+                        "name": "反向传播"
+                    },
+                    {
+                        "id": "gradient-descent",
+                        "name": "梯度下降"
+                    },
+                    {
+                        "id": "activation-function",
+                        "name": "激活函数"
+                    }
+                ]
+            },
+            {
+                "id": "deep-learning-optimization",
+                "name": "优化方法",
+                "keywords": [
+                    {
+                        "id": "batch-normalization",
+                        "name": "批量归一化"
+                    },
+                    {
+                        "id": "dropout",
+                        "name": "Dropout正则化"
+                    },
+                    {
+                        "id": "adam-optimizer",
+                        "name": "Adam优化器"
+                    },
+                    {
+                        "id": "learning-rate",
+                        "name": "学习率调整"
+                    }
+                ]
+            }
+        ],
+        "medicine-clinical-oncology-category": [
+            {
+                "id": "immunotherapy-basics",
+                "name": "免疫治疗基础",
+                "keywords": [
+                    {
+                        "id": "t-cells",
+                        "name": "T细胞",
+                        "hot": true
+                    },
+                    {
+                        "id": "antigens",
+                        "name": "抗原"
+                    },
+                    {
+                        "id": "antibodies",
+                        "name": "抗体"
+                    },
+                    {
+                        "id": "cytokines",
+                        "name": "细胞因子"
+                    }
+                ]
+            },
+            {
+                "id": "treatment-methods",
+                "name": "治疗方法",
+                "keywords": [
+                    {
+                        "id": "cart-therapy",
+                        "name": "CAR-T疗法",
+                        "hot": true
+                    },
+                    {
+                        "id": "pd1-therapy",
+                        "name": "PD-1疗法",
+                        "hot": true
+                    },
+                    {
+                        "id": "tumor-vaccine",
+                        "name": "肿瘤疫苗"
+                    },
+                    {
+                        "id": "combination-therapy",
+                        "name": "联合治疗"
+                    }
+                ]
+            }
+        ],
+        "physics-quantum-category": [
+            {
+                "id": "quantum-computing-basics",
+                "name": "量子计算基础",
+                "keywords": [
+                    {
+                        "id": "qubit",
+                        "name": "量子比特",
+                        "hot": true
+                    },
+                    {
+                        "id": "superposition",
+                        "name": "量子叠加"
+                    },
+                    {
+                        "id": "entanglement",
+                        "name": "量子纠缠"
+                    },
+                    {
+                        "id": "quantum-gate",
+                        "name": "量子门"
+                    }
+                ]
+            },
+            {
+                "id": "quantum-algorithms",
+                "name": "量子算法",
+                "keywords": [
+                    {
+                        "id": "shor-algorithm",
+                        "name": "Shor算法"
+                    },
+                    {
+                        "id": "grover-algorithm",
+                        "name": "Grover算法"
+                    },
+                    {
+                        "id": "quantum-fourier",
+                        "name": "量子傅里叶变换"
+                    },
+                    {
+                        "id": "vqe",
+                        "name": "变分量子本征求解器"
+                    }
+                ]
+            }
+        ]
+    }
+}
