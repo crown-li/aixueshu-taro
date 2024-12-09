@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/Button";
 import { shareContent } from "@/utils/share";
 import { getDirectionsByField } from "@/data/research-directions";
 import { cn } from "@/lib/utils";
+import Taro from "@tarojs/taro";
+// import towxml from '../../towxml'
 
 const researchTerms = {
   "cs-ai-llm": ["大语言模型", "多模态理解", "Transformer架构", "注意力机制"],
@@ -24,6 +26,7 @@ const researchTerms = {
 };
 
 export default function Home() {
+  const [article,setArticle] = useState(null)
   const [mockPeriods, setMockPeriods] = useState([]);
   const [selectedPeriod, setSelectedPeriod] = useState();
   const [activeSection, setActiveSection] = useState("");
@@ -32,14 +35,21 @@ export default function Home() {
   const [commentCount] = useState(Math.floor(Math.random() * 20));
   const { fields } = useUserStore();
   const [categories, setCategories] = useState([]);
+  const [dataTowxml, setDataTowxml] = useState({})
 
   useEffect(()=>{
     const fetchMockPeriods = async () => {
       try {
         const res = await getMockPeriods();
         const mockPeriods = res.data
+        // const content = towxml(mockPeriods[0]?.articles[0]?.content,'markdown',{})
+        const content = mockPeriods[0]?.articles[0]?.content
+
         setMockPeriods(mockPeriods)
         setSelectedPeriod(mockPeriods[0].id)
+        setArticle(mockPeriods[0]?.articles[0])
+        setDataTowxml(content)
+        console.log('article:',mockPeriods[0]?.articles[0])
       } catch (error) {
         console.log(error);
       }
@@ -62,7 +72,7 @@ export default function Home() {
     fetchResearchDirections();
   }, []);
 
-  const article = mockPeriods.find((p) => p.id === selectedPeriod)?.articles[0];
+  // const article = mockPeriods.find((p) => p.id === selectedPeriod)?.articles[0];
 
   const handleSectionClick = (sectionId) => {
     setActiveSection(sectionId);
@@ -120,6 +130,35 @@ export default function Home() {
     return result;
   };
 
+  const convertText = (text) => {
+    // 使用正则表达式匹配$[...]$格式的内容
+    const pattern = /\$\[(.*?)\]\$/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+  
+    while ((match = pattern.exec(text)) !== null) {
+      // 添加普通文本
+      if (match.index > lastIndex) {
+        parts.push(text.slice(lastIndex, match.index));
+      }
+
+      console.log('match:',match)
+      
+      // 添加需要渲染的内容
+      parts.push(renderContent(match[1]));
+      
+      lastIndex = match.index + match[0].length;
+    }
+  
+    // 添加剩余的文本
+    if (lastIndex < text?.length) {
+      parts.push(text.slice(lastIndex));
+    }
+    console.log('parts:',parts)
+    return parts;
+  };
+
   return (
     <View className="home-container bg-gray-50">
       <Container className="pt-safe-top pb-[calc(4rem+env(safe-area-inset-bottom))]">
@@ -171,38 +210,40 @@ export default function Home() {
             className="w-full h-48 rounded-lg mb-6"
           /> */}
 
+          
+
           <View className="text-2xl font-bold mb-4">
-            人工智能研究的最新突破：多模态大语言模型与量子计算的结合
+            {article?.title}
           </View>
           {/* <ArticleTags tags={article?.tags || {}} className="mb-6" /> */}
 
-          <View className="space-y-6 mb-8">
+          {/* <View className="space-y-6 mb-8">
             <View>
               <View className="text-xl font-bold mb-4">研究背景</View>
-              <Text className="text-gray-800 leading-relaxed">
+              <View className="text-gray-800 leading-relaxed">
                 随着人工智能技术的快速发展，{renderContent("大语言模型")}
                 技术在自然语言处理领域取得了显著突破。研究人员通过创新的
                 {renderContent("Transformer架构")}
                 设计，实现了对文本、图像和音频的{renderContent("多模态理解")}
                 能力。同时，{renderContent("量子计算")}
                 技术的进步为AI模型的优化提供了新的可能。
-              </Text>
+              </View>
             </View>
 
             <View>
               <View className="text-xl font-bold mb-4">技术创新</View>
-              <Text className="text-gray-800 leading-relaxed">
+              <View className="text-gray-800 leading-relaxed">
                 研究团队采用改进的{renderContent("注意力机制")}，结合
                 {renderContent("深度学习")}和{renderContent("强化学习")}
                 方法，显著提升了模型的性能。在{renderContent("量子比特")}
                 的支持下，模型的计算效率得到了数量级的提升。特别是在处理复杂的多模态任务时，
                 {renderContent("神经网络")}的优化变得更加高效。
-              </Text>
+              </View>
             </View>
 
             <View>
               <View className="text-xl font-bold mb-4">应用前景</View>
-              <Text className="text-gray-800 leading-relaxed">
+              <View className="text-gray-800 leading-relaxed">
                 这项技术在多个领域展现出巨大潜力。在生物科学领域，结合
                 {renderContent("CRISPR")}技术的{renderContent("基因编辑")}
                 研究取得重要进展。在信息安全方面，{renderContent("量子密码")}和
@@ -210,8 +251,13 @@ export default function Home() {
                 的结合提供了更安全的数据保护方案。在云计算领域，
                 {renderContent("分布式系统")}和{renderContent("微服务架构")}
                 的优化也取得显著成效。
-              </Text>
+              </View>
             </View>
+          </View> */}
+
+          <View className="space-y-6 mb-8">{convertText(article?.content)}</View>
+          <View>
+            {/* <towxml nodes={dataTowxml} /> */}
           </View>
 
           <View

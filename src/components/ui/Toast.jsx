@@ -1,38 +1,32 @@
-import { View, Text } from "@tarojs/components";
-import { cn } from "@/lib/utils";
-
-let currentToast = null;
+import Taro from "@tarojs/taro";
 
 export const Toast = {
-  show: ({ type = "info", message, duration = 2000 }) => {
-    if (currentToast) {
-      clearTimeout(currentToast);
-    }
+  show: async ({ message, duration = 2000 }) => {
 
-    const toastView = document.createElement("div");
-    toastView.className = cn(
-      "fixed left-1/2 top-20 -translate-x-1/2 z-50",
-      "px-4 py-2 rounded-lg shadow-lg",
-      "animate-in fade-in slide-in-from-top-4 duration-200",
-      {
-        "bg-green-500": type === "success",
-        "bg-red-500": type === "error",
-        "bg-blue-500": type === "info",
-      }
-    );
+    // if (Taro.getEnv() === Taro.ENV_TYPE.WEAPP) {
+    //   return new Promise((resolve,reject) => {
+    //     wx.showToast({
+    //       title: message,
+    //       icon: type === 'info' ? 'none' : type,
+    //       duration,
+    //       success: resolve,
+    //       fail: reject
+    //     })
+    //   })
+    // }
 
-    const textElement = document.createElement("span");
-    textElement.className = "text-white text-sm";
-    textElement.textContent = message;
-
-    toastView.appendChild(textElement);
-    document.body.appendChild(toastView);
-
-    currentToast = window.setTimeout(() => {
-      toastView.classList.add("animate-out", "fade-out", "duration-200");
-      setTimeout(() => {
-        document.body.removeChild(toastView);
-      }, 200);
-    }, duration);
+    return await Taro.showToast({
+      title: message,
+      icon: "none",
+      duration,
+    });
+  },
+  showLoading: async (message = '加载中' ) => {
+    return await Taro.showLoading({
+      title: message,
+    });
+  },
+  hideLoading: async () => {
+    return await Taro.hideLoading();
   },
 };

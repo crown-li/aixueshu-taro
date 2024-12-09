@@ -10,22 +10,22 @@ export function RecommendationSection({ recommendation }) {
   };
 
   return (
-    <View className="recommendation-section">
-      <Text className="recommendation-title">
+    <View className="mb-8">
+      <View className="text-lg font-medium mb-4">
         {recommendation.type === "similar" && "相关推荐"}
         {recommendation.type === "popular" && "热门文章"}
         {recommendation.type === "latest" && "最新发布"}
-      </Text>
+      </View>
 
-      <Text className="recommendation-reason">{recommendation.reason}</Text>
+      <View className="text-sm text-gray-500 mb-4">{recommendation.reason}</View>
 
-      <View className="recommendation-list">
+      <View className="space-y-4">
         {recommendation.articles.map((article) => (
           <View key={article.id} onClick={() => handleArticleClick(article.id)}>
-            <Card>
-              <Text className="article-title">{article.title}</Text>
-              <Text className="article-summary">{article.summary}</Text>
-              <View className="article-meta">
+            <Card className="p-4">
+              <View className="font-medium line-clamp-2 mb-2">{article.title}</View>
+              <Text className="text-sm text-gray-500 line-clamp-2">{article.summary}</Text>
+              <View className="flex items-center justify-between mt-2 text-xs text-gray-400">
                 <Text className="publish-date">{article.publishedAt}</Text>
                 <Text className="read-count">{article.readCount} 次阅读</Text>
               </View>

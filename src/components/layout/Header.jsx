@@ -20,6 +20,7 @@ export function Header({
   };
 
   return (
+    // Taro.getEnv() === Taro.ENV_TYPE.WEB && (
     <View
       className={cn(
         "w-full fixed top-[0] left-[0] right-[0] bg-white  border-gray-200 pt-safe-top",
@@ -37,6 +38,7 @@ export function Header({
         </Text>
         <View className="ml-auto">{rightElement}</View>
       </View>
-    </View>
+      </View>
+    // ) 
   );
 }

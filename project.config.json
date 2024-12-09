@@ -2,7 +2,7 @@
   "miniprogramRoot": "dist/",
   "projectname": "taroTranslate",
   "description": "",
-  "appid": "wxa5a3eb392043911c",
+  "appid": "wxe39c527d28b20dfd",
   "setting": {
     "urlCheck": true,
     "es6": false,
@@ -14,13 +14,7 @@
       "ignore": [],
       "disablePlugins": [],
       "outputPath": ""
-    },
-    "packNpmRelationList": [
-      {
-        "packageJsonPath": "./package.json",
-        "miniprogramNpmDistDir": "./miniprogram/"
-      }
-    ]
+    }
   },
   "compileType": "miniprogram",
   "libVersion": "3.7.0",

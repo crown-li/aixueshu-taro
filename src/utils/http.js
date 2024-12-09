@@ -8,6 +8,16 @@ const interceptor = function (chain) {
   const requestParams = chain.requestParams
   const { method, data, url } = requestParams
   
+  // 从本地存储获取token
+  // const token = Taro.getStorageSync('token')
+  let token = '123456'
+
+  // 添加token到请求头
+  requestParams.header = {
+    ...requestParams.header,
+    'Authorization': token ? `Bearer ${token}` : ''
+  }
+  
   requestParams.url = `${TARO_APP_API}${url}`
 
   console.log(`http ${method || 'GET'} --> ${requestParams.url} data: `, data)
@@ -33,10 +43,10 @@ Taro.addInterceptor(interceptor)
 export const request = (url, options = {}) => {
     const { method = 'GET' } = options;
     
-    
     return Taro.request({
         url,
         method,
+        mode: 'cors',
         ...options
     }).then(res => {
       // 这里可以对响应数据做统一处理
@@ -51,8 +61,7 @@ export const request = (url, options = {}) => {
     });
   }
 
-// 导出便捷的请求方法
-export const get = (url, options = {}) => request(url, { ...options, method: 'GET' });
+export const get = (url, data, options = {}) => request(url, { ...options, method: 'GET', data  });
 export const post = (url, data, options = {}) => request(url, { ...options, method: 'POST', data });
 export const put = (url, data, options = {}) => request(url, { ...options, method: 'PUT', data });
-export const del = (url, options = {}) => request(url, { ...options, method: 'DELETE' });
+export const del = (url, data, options = {}) => request(url, { ...options, method: 'DELETE', data });

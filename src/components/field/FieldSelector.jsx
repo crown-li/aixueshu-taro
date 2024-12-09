@@ -7,9 +7,11 @@ import { SubcategorySection } from "@/components/field/SubcategorySection";
 import { AtIcon } from "taro-ui";
 import { getAcademicFields,getResearchDirections } from "@/api/index";
 import { cn } from "@/lib/utils";
+import { Toast } from "@/components/ui/Toast";
 
 
 export function FieldSelector({
+  academicFields,
   selectedField,
   selectedDirections,
   onFieldChange,
@@ -23,33 +25,34 @@ export function FieldSelector({
   const [isScrolling, setIsScrolling] = useState(false);
   const [categories, setCategories] = useState([]);
 
-  const [academicFields, setAcademicFields] = useState([]);
+  // const [academicFields, setAcademicFields] = useState([]);
   
   // 添加数据获取effect
-  useEffect(() => {
-    const fetchAcademicFields = async () => {
-      try {
-        const res = await getAcademicFields();
-        setAcademicFields(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchAcademicFields();
-  }, []);
+  // useEffect(() => {
+  //   const fetchAcademicFields = async () => {
+  //     try {
+  //       const res = await getAcademicFields();
+  //       setAcademicFields(res.data);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+  //   fetchAcademicFields();
+  // }, []);
 
   useEffect(() => {
     const fetchResearchDirections = async () => {
       try {
-        const res = await getResearchDirections();
+        if (!selectedField) return
+        Toast.showLoading()
+        const res = await getResearchDirections(selectedField);
         const researchDirections = res.data
-        const _categories = researchDirections.filter(v => v.fieldId === selectedField);
-        console.log('selectedField:',selectedField)
-        console.log('_categories:',_categories)
-        console.log('_categories:',researchDirections)
+        const _categories = researchDirections.filter(v => v.subjectId === selectedField);
         setCategories(_categories)
       } catch (error) {
         console.log(error);
+      } finally {
+        Toast.hideLoading()
       }
     };
 
@@ -181,7 +184,7 @@ export function FieldSelector({
             title={category.name}
             isHot={category.isHot}
           >
-            {category.subDirections.map((direction) => (
+            {category.children.map((direction) => (
               <View
                     key={direction.id}
                     onClick={() => onDirectionSelect(direction.id)}

@@ -11,18 +11,16 @@ export default defineAppConfig({
     'pages/profile/favorites/index',
     'pages/profile/history/index',
     'pages/profile/settings/index',
-    // 'pages/article/index',
+    'pages/article/index',
     // 'pages/search/index'
   ],
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#fff',
     navigationBarTitleText: '爱学术订阅',
-    navigationBarTextStyle: 'black'
+    navigationBarTextStyle: 'black',
+    navigationStyle: 'custom'
   },
-  staticFileDirs:[
-    "./assets"
-  ],
   tabBar: {
     color: '#666666',
     selectedColor: '#2563eb',

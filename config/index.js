@@ -11,6 +11,7 @@ const config = {
     750: 1,
     828: 1.81 / 2,
   },
+  onePxTransform: false,
   sourceRoot: "src",
   outputRoot: "dist",
   plugins: [],
@@ -26,10 +27,6 @@ const config = {
     prebundle: {
       exclude: ['taro-ui']
     }
-  },
-  enable: true,
-  config: {
-    limit: 10240 // 设定转换尺寸上限
   },
   cache: {
     enable: false,
@@ -81,7 +78,7 @@ const config = {
       url: {
         enable: true,
         config: {
-          limit: 1024,
+          limit: 10240,
         },
       },
     },

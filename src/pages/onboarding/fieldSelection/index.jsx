@@ -5,6 +5,7 @@ import { useUserStore } from "@/store/user";
 import { Header } from "@/components/layout/Header";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
+import { Toast } from "@/components/ui/Toast";
 import { getAcademicFields } from "@/api/index";
 import { FieldSelector } from "@/components/field/FieldSelector";
 
@@ -23,8 +24,6 @@ export default function FieldSelection() {
         const data = res.data
         setAcademicFields(data);
         setSelectedField(data[0].id)
-        console.log('ssssssssssss1:',data)
-        console.log('ssssssssssss2:',data[0].id)
       } catch (error) {
         console.log(error);
       }
@@ -58,14 +57,15 @@ export default function FieldSelection() {
   return (
     <View>
       <Header title="选择关注方向" />
-      <Container className="pt-[calc(3.5rem+env(safe-area-inset-top))] pb-8">
+      <Container className="pt-[calc(env(safe-area-inset-top))] pb-8">
         <View className="mb-6">
-          <Text className="text-gray-500">
+          <View className="text-gray-500">
             请选择1-5个具体研究方向，我们将为您推送相关领域的最新进展
-          </Text>
+          </View>
         </View>
 
         <FieldSelector
+          academicFields={academicFields}
           selectedField={selectedField}
           selectedDirections={selectedDirections}
           onFieldChange={setSelectedField}
