@@ -1,10 +1,16 @@
-import { View, Text } from "@tarojs/components";
+import { View, Text,ScrollView } from "@tarojs/components";
 import { cn } from "@/lib/utils";
 
 export function Tabs({ tabs, selectedTab, onChange, className }) {
   return (
     <View className={cn("border-b border-gray-200", className)}>
-      <View className="grid auto-cols-fr grid-flow-col">
+      <ScrollView
+        scrollX
+        enhanced
+        showScrollbar={false}
+        className="whitespace-nowrap"
+      >
+        <View className="inline-flex gap-5">
         {tabs.map((tab) => (
           <View
             key={tab.id}
@@ -27,6 +33,7 @@ export function Tabs({ tabs, selectedTab, onChange, className }) {
           </View>
         ))}
       </View>
+      </ScrollView>
     </View>
   );
 }

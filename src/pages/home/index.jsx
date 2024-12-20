@@ -1,20 +1,22 @@
-import { View, Text, Image } from "@tarojs/components";
+import { View, Text, Image, Button } from "@tarojs/components";
 import { useState,useEffect } from "react";
 import { AtIcon } from "taro-ui";
 import { Container } from "@/components/layout/Container";
 import { PeriodSelector } from "@/components/article/PeriodSelector";
 import { ArticleNavigation } from "@/components/article/ArticleNavigation";
 import { ResearchTermTag } from "@/components/article/ResearchTermTag";
-import { getMockPeriods, getResearchDirections } from "@/api/index";
+import { getPeriods, getResearchDirections,getArticleDetailInfo, getArticleDetail, addFavorites, deleteFavorites } from "@/api/index";
 import { useUserStore } from "@/store/user";
 import { ArticleTags } from "@/components/article/ArticleTags";
 import { InteractionBar } from "@/components/article/InteractionBar";
-import { Button } from "@/components/ui/Button";
+// import { Button } from "@/components/ui/Button";
+import { Toast } from "@/components/ui/Toast";
 import { shareContent } from "@/utils/share";
 import { getDirectionsByField } from "@/data/research-directions";
 import { cn } from "@/lib/utils";
 import Taro from "@tarojs/taro";
-// import towxml from '../../towxml'
+import { useReadProgress } from '@/hooks/useReadProgress';
+import towxmlFunc from '@/towxml/index'
 
 const researchTerms = {
   "cs-ai-llm": ["大语言模型", "多模态理解", "Transformer架构", "注意力机制"],
@@ -27,63 +29,111 @@ const researchTerms = {
 
 export default function Home() {
   const [article,setArticle] = useState(null)
-  const [mockPeriods, setMockPeriods] = useState([]);
+  const [periods, setPeriods] = useState([]);
   const [selectedPeriod, setSelectedPeriod] = useState();
   const [activeSection, setActiveSection] = useState("");
   const [isFavorite, setIsFavorite] = useState(false);
-  const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 100));
-  const [commentCount] = useState(Math.floor(Math.random() * 20));
-  const { fields } = useUserStore();
-  const [categories, setCategories] = useState([]);
-  const [dataTowxml, setDataTowxml] = useState({})
+  // const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 100));
+  // const [commentCount] = useState(Math.floor(Math.random() * 20));
+  // const { fields } = useUserStore();
+  // const [categories, setCategories] = useState([]);
+  // const [dataTowxml, setDataTowxml] = useState({})
+  // const [articleDetailInfo, setArticleDetailInfo] = useState([])
 
-  useEffect(()=>{
-    const fetchMockPeriods = async () => {
-      try {
-        const res = await getMockPeriods();
-        const mockPeriods = res.data
-        // const content = towxml(mockPeriods[0]?.articles[0]?.content,'markdown',{})
-        const content = mockPeriods[0]?.articles[0]?.content
+  const router = Taro.getCurrentInstance().router;
+  const recordId = router?.params?.recordId;
 
-        setMockPeriods(mockPeriods)
-        setSelectedPeriod(mockPeriods[0].id)
-        setArticle(mockPeriods[0]?.articles[0])
-        setDataTowxml(content)
-        console.log('article:',mockPeriods[0]?.articles[0])
-      } catch (error) {
-        console.log(error);
-      }
+  Taro.useShareAppMessage(() => { 
+    const promise = new Promise(resolve => {
+      const subjectInterpretations = article?.subjectInterpretations?.find(v => v?.tag?.id === activeSection)
+      setTimeout(() => {
+        resolve({
+          title: subjectInterpretations.aggregatedInterpretation?.title || '爱学术',
+          path:`/pages/home/index?recordId=${article?.id}`
+        })
+      }, 2000)
+    })
+    return {
+      title: '爱学术',
+      path: `/pages/home/index`,
+      promise,
     }
-    fetchMockPeriods()
-  },[])
+  })
 
   useEffect(() => {
-    const fetchResearchDirections = async () => {
-      try {
-        const res = await getResearchDirections();
-        const researchDirections = res.data
-        const _categories = researchDirections.filter(v => v.fieldId === fields[0]);
-        setCategories(_categories)
-      } catch (error) {
-        console.log(error);
-      }
-    };
+    if (recordId) {
+      fetchArticleDetail(recordId)
+      return
+    }
+    const fetchArticleDetailInfo = async () => {
+      const res = await getArticleDetailInfo()
+      const data = res.data.items
+      // setArticleDetailInfo(data)
+      fetchArticleDetail(data[0].id)
+      setPeriods(data)
+      setSelectedPeriod(data[0].id)
+    }
+    fetchArticleDetailInfo()
+  },[])
 
-    fetchResearchDirections();
-  }, []);
-
-  // const article = mockPeriods.find((p) => p.id === selectedPeriod)?.articles[0];
+  const fetchArticleDetail = async (recordId) => {
+    Toast.showLoading('加载中')
+    const res = await getArticleDetail(recordId)
+    const data = res.data
+    const currentSection = data.subjectInterpretations[0]
+    setArticle(data)
+    setIsFavorite(currentSection?.isFavorited || false)
+    setActiveSection(currentSection?.tag?.id);
+    Toast.hideLoading()
+  }
 
   const handleSectionClick = (sectionId) => {
     setActiveSection(sectionId);
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+    const currentSection = article.subjectInterpretations.find(v => v?.tag?.id === sectionId)
+    setIsFavorite(currentSection?.isFavorited || false)
   };
 
-  const handleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  const handleFavorite = async () => {
+    const subjectInterpretation = article.subjectInterpretations.find(v => v?.tag?.id === activeSection)
+    if (!subjectInterpretation) return
+
+    try {
+      if (isFavorite) {
+        await deleteFavorites(subjectInterpretation.favoriteId)
+      } else {
+        const res = await addFavorites({
+          pushRecordId: selectedPeriod,
+          subjectInterpretationId: subjectInterpretation?.id,
+          subjectInterpretationTitle: subjectInterpretation?.aggregatedInterpretation?.title,
+        })
+        
+        // 更新当前 section 的 favoriteId
+        const updatedSubjectInterpretations = article.subjectInterpretations.map(item => {
+          if (item?.tag?.id === activeSection) {
+            return {
+              ...item,
+              favoriteId: res.data.id
+            }
+          }
+          return item
+        })
+
+        setArticle({
+          ...article,
+          subjectInterpretations: updatedSubjectInterpretations
+        })
+      }
+      
+      setIsFavorite(!isFavorite)
+      Toast.show({
+        message: isFavorite ? '取消收藏成功' : '收藏成功'
+      })
+    } catch (error) {
+      Toast.show({
+        message: '操作失败'
+      })
+    }
+    
   };
 
   const handleShare = () => {
@@ -95,6 +145,25 @@ export default function Home() {
       });
     }
   };
+
+  // const handleProgressChange = (progress) => {
+  //   // 找到当前激活的解释内容
+  //   const currentInterpretation = article?.subjectInterpretations.find(
+  //     v => v?.subject?.id === activeSection
+  //   );
+    
+  //   if (currentInterpretation) {
+  //     updateArticleDetailReadProgress({
+  //       id: currentInterpretation.id,
+  //       progress
+  //     });
+  //   }
+  // };
+
+  const readProgress = useReadProgress({
+    target:'.home-container',
+    article:article?.subjectInterpretations?.find(v => v?.tag?.id === activeSection),
+  });
 
   const renderContent = (text) => {
     let result = [];
@@ -143,8 +212,6 @@ export default function Home() {
         parts.push(text.slice(lastIndex, match.index));
       }
 
-      console.log('match:',match)
-      
       // 添加需要渲染的内容
       parts.push(renderContent(match[1]));
       
@@ -160,160 +227,133 @@ export default function Home() {
   };
 
   return (
-    <View className="home-container bg-gray-50">
-      <Container className="pt-safe-top pb-[calc(4rem+env(safe-area-inset-bottom))]">
+    <View className='home-container'>
+      <Container className='pt-safe-top pb-[calc(4rem+env(safe-area-inset-bottom))]'>
         {
-            mockPeriods?.length &&
+            periods?.length ?
             <PeriodSelector
-            periods={mockPeriods}
-            selectedPeriod={selectedPeriod}
-            onSelect={setSelectedPeriod}
-            />
+              periods={periods}
+              selectedPeriod={selectedPeriod}
+              onSelect={setSelectedPeriod}
+            /> : null
         }
 
-        <View className="flex items-center justify-end gap-2 mb-4">
+        <View className='flex items-center justify-end gap-2 mb-4'>
           <View
-            variant="outline"
-            size="sm"
+            variant='outline'
+            size='sm'
             onClick={handleFavorite}
             className={cn("bg-white w-6 h-6 flex items-center justify-center rounded", isFavorite && "text-blue-600")}
           >
-            <AtIcon
-              value={"bookmark"}
-              size="16"
+            <AtIcon 
+              value={isFavorite ? "star-2" : "star"} 
+              size='16' 
               color={isFavorite ? "#2563eb" : "#666666"}
             />
           </View>
-          <View
+          {/* <View
             variant="outline"
             size="sm"
             onClick={handleShare}
             className="bg-white w-6 h-6 flex items-center justify-center rounded"
           >
             <AtIcon value="share" size="16" color="#666666" />
-          </View>
-        </View>
-
-        <ArticleNavigation
-          sections={categories.map((category) => ({
-            id: category.id,
-            title: category.name,
-            isActive: activeSection === category.id,
-          }))}
-          onSectionClick={handleSectionClick}
-        />
-
-        <View className="prose prose-sm max-w-none pt-4">
-          {/* <Image
-            src="https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=2000"
-            mode="aspectFill"
-            className="w-full h-48 rounded-lg mb-6"
-          /> */}
-
-          
-
-          <View className="text-2xl font-bold mb-4">
-            {article?.title}
-          </View>
-          {/* <ArticleTags tags={article?.tags || {}} className="mb-6" /> */}
-
-          {/* <View className="space-y-6 mb-8">
-            <View>
-              <View className="text-xl font-bold mb-4">研究背景</View>
-              <View className="text-gray-800 leading-relaxed">
-                随着人工智能技术的快速发展，{renderContent("大语言模型")}
-                技术在自然语言处理领域取得了显著突破。研究人员通过创新的
-                {renderContent("Transformer架构")}
-                设计，实现了对文本、图像和音频的{renderContent("多模态理解")}
-                能力。同时，{renderContent("量子计算")}
-                技术的进步为AI模型的优化提供了新的可能。
-              </View>
-            </View>
-
-            <View>
-              <View className="text-xl font-bold mb-4">技术创新</View>
-              <View className="text-gray-800 leading-relaxed">
-                研究团队采用改进的{renderContent("注意力机制")}，结合
-                {renderContent("深度学习")}和{renderContent("强化学习")}
-                方法，显著提升了模型的性能。在{renderContent("量子比特")}
-                的支持下，模型的计算效率得到了数量级的提升。特别是在处理复杂的多模态任务时，
-                {renderContent("神经网络")}的优化变得更加高效。
-              </View>
-            </View>
-
-            <View>
-              <View className="text-xl font-bold mb-4">应用前景</View>
-              <View className="text-gray-800 leading-relaxed">
-                这项技术在多个领域展现出巨大潜力。在生物科学领域，结合
-                {renderContent("CRISPR")}技术的{renderContent("基因编辑")}
-                研究取得重要进展。在信息安全方面，{renderContent("量子密码")}和
-                {renderContent("区块链技术")}
-                的结合提供了更安全的数据保护方案。在云计算领域，
-                {renderContent("分布式系统")}和{renderContent("微服务架构")}
-                的优化也取得显著成效。
-              </View>
-            </View>
           </View> */}
-
-          <View className="space-y-6 mb-8">{convertText(article?.content)}</View>
-          <View>
-            {/* <towxml nodes={dataTowxml} /> */}
-          </View>
-
-          <View
-            className="border-slide border-gray-400 pt-6 mb-8"
-            style={{ borderTop: "1px solid #e5e7eb" }}
+          <Button 
+            className='flex flex-col p-0 m-0 border-0 leading-none flex justify-center items-center bg-white after:border-none w-6 h-6 rounded' 
+            openType='share' 
           >
-            <Text className="text-lg font-medium mb-4">参考文献</Text>
-            <View className="space-y-4">
-              {article?.references.map((ref, index) => (
-                <View key={index} className="text-sm">
-                  <Text className="font-medium mb-1">{ref.title}</Text>
-                  <Text className="text-gray-600">
-                    {ref.authors.join(", ")} ({ref.year})
-                  </Text>
-                  <Text className="text-gray-600">{ref.journal}</Text>
-                  {ref.doi && (
-                    <Text
-                      className="inline-flex items-center text-blue-600 hover:text-blue-700 mt-1"
-                      onClick={() =>
-                        Taro.setClipboardData({
-                          data: `https://doi.org/${ref.doi}`,
-                          success: () => {
-                            Taro.getClipboardData({
-                              success: function (res) {
-                                Taro.showToast({
-                                  title: "DOI已复制",
-                                  icon: "success",
-                                });
-                              },
-                            });
-                          },
-                        })
-                      }
-                    >
-                      DOI: {ref.doi}
-                      <AtIcon
-                        value="external-link"
-                        size="12"
-                        className="ml-1"
-                      />
-                    </Text>
-                  )}
-                </View>
-              ))}
-            </View>
-          </View>
+            <AtIcon value='share' size='16' color='#999' />
+          </Button>
         </View>
+
+        {
+          article?.subjectInterpretations?.length ? <ArticleNavigation
+            sections={article?.subjectInterpretations?.map((category) => ({
+                id: category?.tag?.id,
+                title: category?.tag?.name,
+                isActive: activeSection === category?.tag?.id,
+              })) || []}
+            onSectionClick={handleSectionClick}
+          /> : null
+        }
+        {
+          article?.subjectInterpretations?.map(v => { 
+            
+            if (activeSection === v?.tag?.id) {
+              return (
+                <View className='prose prose-sm max-w-none pt-4' key={v?.tag?.id}>
+
+                  {/* <View className='text-2xl font-bold mb-4'>
+                    <towxml nodes={towxmlFunc('# ' + v?.aggregatedInterpretation?.title, 'markdown')} />
+                  </View> */}
+                  {/* <ArticleTags tags={article?.tags || {}} className="mb-6" /> */}
+
+                  {/* <View className="space-y-6 mb-8">{convertText(v?.aggregatedInterpretation?.content)}</View>
+                  <View className="space-y-6 mb-8">{convertText(v?.aggregatedInterpretation?.recommendations)}</View> */}
+                  <View className='space-y-6 mb-8'>
+                    <towxml nodes={towxmlFunc(v?.aggregatedInterpretation?.content, 'markdown')} />
+                  </View>
+                  <View className='space-y-6 mb-8'>
+                    <towxml nodes={towxmlFunc(v?.aggregatedInterpretation?.recommendations, 'markdown')} />
+                  </View>
+
+                  <View
+                    className='border-slide border-gray-400 pt-6 mb-8'
+                    style={{ borderTop: "1px solid #e5e7eb" }}
+                  >
+                    <View className='text-lg font-medium mb-4'>参考文献</View>
+                    <View className='space-y-4'>
+                      {v?.articles?.map((ref, index) => (
+                        <View key={index} className='text-sm text-gray-600'>
+                          <View className='font-medium mb-1'>{ref.title}</View>
+                          
+                          <View className='text-gray-500'>
+                            {ref?.authors?.join(", ")} ({ref?.source?.publishDate})
+                          </View>
+                          {/* <Text className="text-gray-600">{ref.journal}</Text> */}
+                          {ref?.source?.url && (
+                            <View
+                              className='inline-flex items-center text-blue-600 hover:text-blue-700 mt-1'
+                              onClick={() =>
+                                Taro.setClipboardData({
+                                  data: `${ref?.source?.website}`,
+                                  success: () => {
+                                    Taro.getClipboardData({
+                                      success: function (res) {
+                                        Toast.show({
+                                          message: "DOI已复制",
+                                        });
+                                      },
+                                    });
+                                  },
+                                })
+                              }
+                            >
+                              DOI: {ref?.source?.website}
+                              <AtIcon
+                                value='external-link'
+                                size='12'
+                                className='ml-1'
+                              />
+                            </View>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                </View>
+              )
+            }
+          })
+        }
       </Container>
-      <InteractionBar
-        onLike={() => setLikeCount((prev) => prev + 1)}
-        onDislike={() => {}}
-        onComment={() => {}}
-        onShare={handleShare}
-        likeCount={likeCount}
-        commentCount={commentCount}
-      />
+      {
+        article?.subjectInterpretations ? <InteractionBar
+          article={article?.subjectInterpretations?.find(v => v?.tag?.id === activeSection)}
+        /> : null
+      }
+      
     </View>
   );
 }

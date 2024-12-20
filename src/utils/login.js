@@ -6,8 +6,9 @@ export const doLogin = async () => {
     try {
       // 微信登录获取code
       const { code } = await Taro.login();
+      console.log('code:',code)
       if (!code) {
-        throw new Error('微信登录失败');
+        throw new Error('code获取失败');
       }
       
       // 后端登录获取token

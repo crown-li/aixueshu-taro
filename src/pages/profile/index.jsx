@@ -13,7 +13,7 @@ export default function Profile() {
       title: "关注设置",
       icon: "bookmark",
       description: "管理您关注的领域和研究方向",
-      url: "/pages/onboarding/fieldSelection/index",
+      url: "/pages/onboarding/fieldSelection/index?referrer=profile",
     },
     {
       title: "我的收藏",

@@ -5,7 +5,7 @@ import Taro from "@tarojs/taro";
 import { SubcategorySection } from "@/components/field/SubcategorySection";
 // import { Check } from "lucide-react";
 import { AtIcon } from "taro-ui";
-import { getAcademicFields,getResearchDirections } from "@/api/index";
+import { getAcademicFields,getResearchDirections,getUserSubscriptions } from "@/api/index";
 import { cn } from "@/lib/utils";
 import { Toast } from "@/components/ui/Toast";
 
@@ -18,6 +18,7 @@ export function FieldSelector({
   onDirectionSelect,
   disabled = false,
   maxSelections = 5,
+  isFromProfile = false, 
 }) {
   const containerRef = useRef(null);
   const touchStartX = useRef(0);
@@ -25,38 +26,24 @@ export function FieldSelector({
   const [isScrolling, setIsScrolling] = useState(false);
   const [categories, setCategories] = useState([]);
 
-  // const [academicFields, setAcademicFields] = useState([]);
-  
-  // 添加数据获取effect
-  // useEffect(() => {
-  //   const fetchAcademicFields = async () => {
-  //     try {
-  //       const res = await getAcademicFields();
-  //       setAcademicFields(res.data);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
-  //   fetchAcademicFields();
-  // }, []);
-
   useEffect(() => {
-    const fetchResearchDirections = async () => {
+    const fetchData = async () => {
       try {
-        if (!selectedField) return
-        Toast.showLoading()
+        if (!selectedField) return;
+        Toast.showLoading();
+        
+        // 只保留获取研究方向的逻辑
         const res = await getResearchDirections(selectedField);
-        const researchDirections = res.data
+        const researchDirections = res.data;
         const _categories = researchDirections.filter(v => v.subjectId === selectedField);
-        setCategories(_categories)
-      } catch (error) {
-        console.log(error);
+        setCategories(_categories);
+        
       } finally {
-        Toast.hideLoading()
+        Toast.hideLoading();
       }
     };
-
-    fetchResearchDirections();
+  
+    fetchData();
   }, [selectedField]);
 
   const getCurrentFieldIndex = () => {

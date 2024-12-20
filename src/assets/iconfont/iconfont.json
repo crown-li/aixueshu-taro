@@ -1,0 +1,44 @@
+{
+  "id": "4777461",
+  "name": "爱学术订阅推送小程序",
+  "font_family": "aixueshu-mini",
+  "css_prefix_text": "aixueshu-mini-",
+  "description": "爱学术订阅推送小程序",
+  "glyphs": [
+    {
+      "icon_id": "41397631",
+      "name": "拖拽",
+      "font_class": "tuozhuai",
+      "unicode": "ec12",
+      "unicode_decimal": 60434
+    },
+    {
+      "icon_id": "1435245",
+      "name": "喜欢",
+      "font_class": "xihuan",
+      "unicode": "e635",
+      "unicode_decimal": 58933
+    },
+    {
+      "icon_id": "9713068",
+      "name": "评论",
+      "font_class": "pinglun",
+      "unicode": "e687",
+      "unicode_decimal": 59015
+    },
+    {
+      "icon_id": "14488418",
+      "name": "不喜欢",
+      "font_class": "ziyuan174",
+      "unicode": "e772",
+      "unicode_decimal": 59250
+    },
+    {
+      "icon_id": "25537481",
+      "name": "分享",
+      "font_class": "fenxiang",
+      "unicode": "e7ca",
+      "unicode_decimal": 59338
+    }
+  ]
+}

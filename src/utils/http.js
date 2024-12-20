@@ -9,8 +9,7 @@ const interceptor = function (chain) {
   const { method, data, url } = requestParams
   
   // 从本地存储获取token
-  // const token = Taro.getStorageSync('token')
-  let token = '123456'
+  const token = Taro.getStorageSync('token')
 
   // 添加token到请求头
   requestParams.header = {
@@ -25,6 +24,19 @@ const interceptor = function (chain) {
   return chain.proceed(requestParams)
     .then(res => {
       console.log(`http <-- ${requestParams.url} result:`, res)
+      
+      // 处理 40001 状态码
+      if (res.data.code == 401) {
+        // 清除本地存储的token
+        Taro.clearStorageSync()
+        
+        // 关闭所有页面,跳转到欢迎页
+        Taro.reLaunch({
+          url: '/pages/onboarding/welcome/index'
+        })
+        return Promise.reject(res.data)
+      }
+      
       return res
     })
 }

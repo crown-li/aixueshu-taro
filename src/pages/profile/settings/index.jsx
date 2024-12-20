@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, Switch, RadioGroup,Radio,Input} from '@tarojs/components';
 import { Container } from '@/components/layout/Container';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/Button';
-// import { Input } from '@/components/ui/Input';
 import Taro from '@tarojs/taro';
 import { AtIcon } from 'taro-ui'
 import { cn } from '@/lib/utils';
 import './index.scss'
+import { getUserSettings, updateUserPushSettings } from '@/api/index';
+
+
 // import "taro-ui/dist/style/components/switch.scss";
 
 export default function Settings() {
@@ -52,63 +54,80 @@ export default function Settings() {
 //       description: '每周推送一次研究汇总',
 //       value: 'weekly',
 //     },
-//   ];
+  //   ];
+  
+  const fetchSettings = async () => {
+    const res = await getUserSettings();
+    const [first,...other] = notificationSettings
+      
+    setNotificationSettings([
+      {
+        ...first,
+        enabled: res.pushEnabled || false,
+      },
+      ...other
+    ]);
+  };
+  
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
-  const toggleNotification = (id) => {
+  const toggleNotification = async (id,enabled) => {
+    await updateUserPushSettings({ id, enabled });
+    // 更新本地状态
     setNotificationSettings(prev =>
       prev.map(setting =>
-        setting.id === id
-          ? { ...setting, enabled: !setting.enabled }
-          : setting
+        setting.id === id ? { ...setting, enabled } : setting
       )
     );
 
-    if (id === 'email') {
-      setShowEmailInput(prev => !prev);
-    }
+    // if (id === 'email') {
+    //   setShowEmailInput(prev => !prev);
+    // }
   };
 
-  const handleAddEmail = () => {
-    if (!emailInput.trim() || !emailInput.includes('@')) {
-      Taro.showToast({
-        title: '请输入有效的邮箱地址',
-        icon: 'error',
-      });
-      return;
-    }
+  // const handleAddEmail = () => {
+  //   if (!emailInput.trim() || !emailInput.includes('@')) {
+  //     Taro.showToast({
+  //       title: '请输入有效的邮箱地址',
+  //       icon: 'error',
+  //     });
+  //     return;
+  //   }
 
-    if (subscriptions.some(sub => sub.email === emailInput)) {
-      Taro.showToast({
-        title: '该邮箱已添加',
-        icon: 'error',
-      });
-      return;
-    }
+  //   if (subscriptions.some(sub => sub.email === emailInput)) {
+  //     Taro.showToast({
+  //       title: '该邮箱已添加',
+  //       icon: 'error',
+  //     });
+  //     return;
+  //   }
 
-    setSubscriptions(prev => [...prev, { email: emailInput, verified: false }]);
-    setEmailInput('');
-    Taro.showToast({
-      title: '验证邮件已发送，请查收',
-      icon: 'success',
-    });
-  };
+  //   setSubscriptions(prev => [...prev, { email: emailInput, verified: false }]);
+  //   setEmailInput('');
+  //   Taro.showToast({
+  //     title: '验证邮件已发送，请查收',
+  //     icon: 'success',
+  //   });
+  // };
 
-  const handleRemoveEmail = (email) => {
-    setSubscriptions(prev => prev.filter(sub => sub.email !== email));
-  };
+  // const handleRemoveEmail = (email) => {
+  //   setSubscriptions(prev => prev.filter(sub => sub.email !== email));
+  // };
 
-  const handleResendVerification = (email) => {
-    Taro.showToast({
-      title: '验证邮件已重新发送',
-      icon: 'success',
-    });
-  };
+  // const handleResendVerification = (email) => {
+  //   Taro.showToast({
+  //     title: '验证邮件已重新发送',
+  //     icon: 'success',
+  //   });
+  // };
 
-    const toProfile = () => {
-        Taro.switchTab({
-        url:'/pages/profile/index'
-        })
-    }
+  const toProfile = () => {
+      Taro.switchTab({
+      url:'/pages/profile/index'
+    })
+  }
 
   return (
     <View className="bg-gray-50 min-h-screen">
@@ -131,19 +150,19 @@ export default function Settings() {
                     />
                     <View>
                       <Text className="font-medium">{setting.title}</Text>
-                      <Text className="text-sm text-gray-500">
+                      <Text className="text-sm text-gray-500 ml-1">
                         {setting.description}
                       </Text>
                     </View>
                   </View>
                   <View className="relative inline-flex items-center cursor-pointer">
-                    <Switch  color="#2563eb" checked={setting.enabled} onChange={() => toggleNotification(setting.id)} />
+                    <Switch  color="#2563eb" checked={!setting.enabled} onChange={() => toggleNotification(setting.id)} />
                   </View>
                 </View>
               ))}
             </View>
 
-            {notificationSettings.find(s => s.id === 'email')?.enabled && (
+            {/* {notificationSettings.find(s => s.id === 'email')?.enabled && (
               <View className="mt-4 space-y-4">
                 <View className="flex items-center gap-2">
                   <Input
@@ -203,7 +222,7 @@ export default function Settings() {
                   ))}
                 </View>
               </View>
-            )}
+            )} */}
           </View>
 
           {/* <View>

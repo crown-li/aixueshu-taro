@@ -1,8 +1,8 @@
 export default defineAppConfig({
   pages: [
-    'pages/index/index',
-    'pages/home/index',
+    // 'pages/index/index',
     'pages/onboarding/welcome/index',
+    'pages/home/index',
     'pages/onboarding/fields/index',
     'pages/onboarding/fieldSelection/index',
     // 'pages/onboarding/directions/index',

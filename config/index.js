@@ -7,6 +7,7 @@ const config = {
   // designWidth: 750,
   designWidth: 375,
   deviceRatio: {
+    375: 2 / 1,
     640: 2.34 / 2,
     750: 1,
     828: 1.81 / 2,
@@ -17,8 +18,29 @@ const config = {
   plugins: [],
   defineConstants: {},
   copy: {
-    patterns: [],
-    options: {},
+    patterns: [
+    {
+      from: 'src/towxml',
+      to: 'dist/towxml',
+    }
+  ],
+  options: {}  // 保持空对象
+  },
+  weapp: {
+    module: {
+      postcss: {
+        autoprefixer: {
+          enable: true
+        },
+        // 小程序端样式引用本地资源内联配置
+        url: {
+          enable: true,
+          config: {
+            limit: 10240 // 文件大小限制
+          }
+        }
+      }
+    }
   },
   framework: "react",
   // compiler: "webpack5",
@@ -67,7 +89,12 @@ const config = {
             }]
           }
         }
-      })
+      });
+    },
+    compile: {
+      exclude: [
+        path.resolve(__dirname, '..', 'src/towxml')
+      ]
     },
     postcss: {
       pxtransform: {

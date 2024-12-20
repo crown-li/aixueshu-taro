@@ -1,7 +1,7 @@
 import Taro from "@tarojs/taro";
 
 export const Toast = {
-  show: async ({ message, duration = 2000 }) => {
+  show: async ({ message, duration = 2000,mask = true }) => {
 
     // if (Taro.getEnv() === Taro.ENV_TYPE.WEAPP) {
     //   return new Promise((resolve,reject) => {
@@ -19,6 +19,7 @@ export const Toast = {
       title: message,
       icon: "none",
       duration,
+      mask,
     });
   },
   showLoading: async (message = '加载中' ) => {
