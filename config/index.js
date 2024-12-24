@@ -17,15 +17,6 @@ const config = {
   outputRoot: "dist",
   plugins: [],
   defineConstants: {},
-  copy: {
-    patterns: [
-    {
-      from: 'src/towxml',
-      to: 'dist/towxml',
-    }
-  ],
-  options: {}  // 保持空对象
-  },
   weapp: {
     module: {
       postcss: {
@@ -59,6 +50,21 @@ const config = {
   mini: {
     webpackChain(chain) {
       chain.module
+        .rule('ignore-towxml')
+        .test(/[\\/]towxml[\\/].*\.(wxml)$/)
+        .use('null-loader')
+        .loader(require.resolve('null-loader'));
+      chain.module
+        .rule('towxml-js')
+        .test(/[\\/]towxml[\\/].*\.js$/)
+        .use('babel-loader')
+        .loader(require.resolve('babel-loader'))
+        .options({
+          presets: [
+            ['@babel/preset-env']
+          ]
+       });
+      chain.module
         .rule('image')
         .test(/\.(png|jpe?g|gif|svg)$/i)
         .use('url-loader')
@@ -90,11 +96,17 @@ const config = {
           }
         }
       });
-    },
-    compile: {
-      exclude: [
-        path.resolve(__dirname, '..', 'src/towxml')
-      ]
+      chain.plugin('copy-towxml')
+        .use(require('copy-webpack-plugin'), [{
+          patterns: [
+            {
+              from: path.resolve(__dirname, '..', 'src/towxml'),
+              to: path.resolve(__dirname, '..', 'dist/towxml'),
+              // 强制复制并覆盖
+              force: true,
+            }
+          ]
+        }]);
     },
     postcss: {
       pxtransform: {

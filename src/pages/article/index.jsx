@@ -12,7 +12,7 @@ import { getFavoritesDetail, deleteFavorites, addFavorites } from '@/api/index';
 import { cn } from '@/lib/utils';
 import { shareContent } from '@/utils/share';
 import { useReadProgress } from '@/hooks/useReadProgress';
-import towxmlFunc from '@/towxml/index'
+// import towxmlFunc from '@/towxml/index'
 
 export default function Article() {
   const router = Taro.getCurrentInstance().router;
@@ -159,10 +159,10 @@ export default function Article() {
           </View> */}
 
           <View className='mb-8 whitespace-pre-line'>
-            <towxml nodes={towxmlFunc(article?.aggregatedInterpretation?.content, 'markdown')} />
+            {/* <towxml nodes={towxmlFunc(article?.aggregatedInterpretation?.content, 'markdown')} /> */}
           </View>
           <View className='mb-8 space-y-6 whitespace-pre-line'>
-            <towxml nodes={towxmlFunc(article?.aggregatedInterpretation?.recommendations, 'markdown')} />
+            {/* <towxml nodes={towxmlFunc(article?.aggregatedInterpretation?.recommendations, 'markdown')} /> */}
           </View>
 
           {

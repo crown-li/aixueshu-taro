@@ -16,7 +16,7 @@ import { getDirectionsByField } from "@/data/research-directions";
 import { cn } from "@/lib/utils";
 import Taro from "@tarojs/taro";
 import { useReadProgress } from '@/hooks/useReadProgress';
-import towxmlFunc from '@/towxml/index'
+import towxmlFunc from '../../towxml'
 
 const researchTerms = {
   "cs-ai-llm": ["大语言模型", "多模态理解", "Transformer架构", "注意力机制"],
@@ -69,9 +69,12 @@ export default function Home() {
       const res = await getArticleDetailInfo()
       const data = res.data.items
       // setArticleDetailInfo(data)
-      fetchArticleDetail(data[0].id)
-      setPeriods(data)
-      setSelectedPeriod(data[0].id)
+      if (data.length) {
+        console.log('data:',data)
+        fetchArticleDetail(data[0].id)
+        setPeriods(data)
+        setSelectedPeriod(data[0].id)
+      }
     }
     fetchArticleDetailInfo()
   },[])

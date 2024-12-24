@@ -4,8 +4,6 @@ const md = require('./parse/markdown/index'),
 module.exports = (str,type,option)=>{
     option = option || {};
     let result;
-    console.log('type:', type)
-    if(!type || type == {}) return
     switch (type) {
         case 'markdown':
             result = parse(md(str),option);
